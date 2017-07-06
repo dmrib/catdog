@@ -9,7 +9,7 @@ import dataset
 class Dataset():
     """Abstraction for a image dataset."""
 
-    def __init__(self, paths):
+    def __init__(self, paths, filters):
         """Initializer.
 
         Args:
@@ -20,7 +20,8 @@ class Dataset():
         """
         self.data = self.load_images(paths)
         self.dimensions = self.compute_default_size(use_mean=True)
-        self.resize(self.dimensions)
+        self.resize_dataset(self.dimensions)
+        self.apply_filters(filters)
 
     def load_images(self, paths):
         """Read every image in paths list.
@@ -61,7 +62,7 @@ class Dataset():
         else:
             return (min(widths), min(heights))
 
-    def resize(self, dimensions):
+    def resize_dataset(self, dimensions):
         """Resize entire dataset to default width and height.
 
         Args:
@@ -73,9 +74,21 @@ class Dataset():
         for image in self.data:
             image.resize(dimensions[0], dimensions[1])
 
-        self.data[0].show()
-        self.data[-1].show()
-        self.data[5].show()
+    def apply_filters(self, filters):
+        """Apply filters in the dataset images.
+
+        Args:
+            filters (list): name of the filters to be applied.
+        Returns:
+            None.
+
+        """
+        if 'grayscale' in filters:
+            for image in self.data:
+                image.to_gray()
+        if 'thresholding' in filters:
+            for image in self.data:
+                image.adaptive_thresholding()
 
 
 class Sample():
@@ -118,6 +131,33 @@ class Sample():
         self.image = cv2.resize(self.image, (width, height),
                                 interpolation=cv2.INTER_AREA)
 
+    def to_gray(self):
+        """Convert image to grayscale.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+
+    def adaptive_thresholding(self):
+        """Apply global adaptative thresholding filter.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        self.image = cv2.adaptiveThreshold(self.image, 255,
+                                           cv2.ADAPTIVE_THRESH_MEAN_C,
+                                           cv2.THRESH_BINARY, 5, 0)
+
 
 if __name__ == '__main__':
-    s = Dataset(dataset.get_images_paths()[:10])
+    s = Dataset(dataset.get_images_paths(), ['grayscale', 'thresholding'])
+    cv2.imshow('test', s.data[2].image)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
