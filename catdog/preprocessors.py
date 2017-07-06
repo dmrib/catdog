@@ -47,16 +47,16 @@ class Dataset():
             height (int): maximum image height.
 
         """
-        height = 1000000
-        width = 1000000
+        min_height = 1000000
+        min_width = 1000000
         for image in self.data:
-            w, h = image.shape
-            if w < width:
-                width = w
-            if h < height:
-                height = h
+            width, height = image.shape
+            if width < min_width:
+                min_width = width
+            if height < min_height:
+                height = min_height
 
-        return width, height
+        return min_width, min_height
 
 
 class Sample():
