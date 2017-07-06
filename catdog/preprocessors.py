@@ -85,13 +85,22 @@ class Dataset():
         """
         if 'grayscale' in filters:
             for image in self.data:
-                image.to_gray()
+                image.grayscale()
         elif 'thresholding' in filters:
             for image in self.data:
                 image.adaptive_thresholding()
         elif 'median' in filters:
             for image in self.data:
                 image.median()
+        elif 'grayscale and median' in filters:
+            for image in self.data:
+                image.grayscale()
+                image.median()
+                image.show()
+        elif 'median and thresholding' in filters:
+            for image in self.data:
+                image.median()
+                image.adaptive_thresholding()
 
 
 class Sample():
@@ -134,7 +143,7 @@ class Sample():
         self.image = cv2.resize(self.image, (width, height),
                                 interpolation=cv2.INTER_AREA)
 
-    def to_gray(self):
+    def grayscale(self):
         """Convert image to grayscale.
 
         Args:
@@ -154,7 +163,7 @@ class Sample():
             None.
 
         """
-        self.to_gray()
+        self.grayscale()
         self.image = cv2.adaptiveThreshold(self.image, 255,
                                            cv2.ADAPTIVE_THRESH_MEAN_C,
                                            cv2.THRESH_BINARY, 5, 0)
@@ -172,7 +181,6 @@ class Sample():
 
 
 if __name__ == '__main__':
-    s = Dataset(dataset.get_images_paths()[:6], ['median'])
-    cv2.imshow('test', s.data[2].image)
+    s = Dataset(dataset.get_images_paths()[:6], ['grayscale and median'])
     cv2.waitKey()
     cv2.destroyAllWindows()
