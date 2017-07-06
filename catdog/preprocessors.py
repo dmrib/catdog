@@ -95,7 +95,6 @@ class Dataset():
             for image in self.data:
                 image.grayscale()
                 image.median()
-                image.show()
         elif 'median and thresholding' in filters:
             for image in self.data:
                 image.median()
@@ -180,8 +179,22 @@ class Sample():
         """
         self.image = cv2.medianBlur(self.image, 5)
 
+    def mirror(self, axis):
+        """Mirror image horizontaly or verticaly (h or v).
+
+        Args:
+            axis (string): v for verticaly h for horizontaly.
+        Returns:
+            None.
+
+        """
+        if axis == 'v':
+            self.image = cv2.flip(self.image, 0)
+        else:
+            self.image = cv2.flip(self.image, 1)
+
+
 
 if __name__ == '__main__':
-    s = Dataset(dataset.get_images_paths()[:6], ['grayscale and median'])
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    s = Dataset(dataset.get_images_paths()[:10], ['median and thresholding'])
+    s.generate_sintetic_dataset()
