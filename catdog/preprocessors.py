@@ -2,6 +2,38 @@
 
 
 import cv2
+import dataset
+
+
+class Dataset():
+    """Abstraction for a image dataset."""
+
+    def __init__(self, paths):
+        """Initializer.
+
+        Args:
+            paths (list): list containing images paths.
+        Returns:
+            None.
+
+        """
+        self.data = self.load_images(paths)
+        self.default_width, self.default_height = self.compute_defaults()
+
+    def load_images(self, paths):
+        """Read every image in paths list.
+
+        Args:
+            paths (list): list containing images paths.
+
+        Returns:
+            images (list): list of loaded sample images.
+
+        """
+        images = []
+        for image_path in paths:
+            sample = Sample(image_path)
+            images.append(sample)
 
 
 class Sample():
@@ -45,7 +77,4 @@ class Sample():
 
 
 if __name__ == '__main__':
-    s = Sample('../data/cat.0.jpg')
-    s.show()
-    s.resize(500, 500)
-    s.show()
+    s = Dataset(dataset.get_images_paths())
