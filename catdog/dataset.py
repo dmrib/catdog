@@ -35,7 +35,7 @@ def label_images(paths):
     return image_labels
 
 
-def training_and_validation_set(paths):
+def training_and_validation_set(paths, percentile=10):
     """Separates dataset in training and test set.
 
     Args:
@@ -47,7 +47,7 @@ def training_and_validation_set(paths):
     """
     paths = paths[:]
     random.shuffle(paths)
-    training_set = paths[:round(len(paths)/10)]
-    validation_set = paths[round(len(paths)/10):]
+    training_set = paths[:round(len(paths)/percentile)]
+    validation_set = paths[round(len(paths)/percentile):]
 
     return training_set, validation_set
