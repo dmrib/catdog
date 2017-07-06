@@ -20,7 +20,6 @@ class Dataset():
         """
         self.data = self.load_images(paths)
         self.dimensions = self.compute_default_size(use_mean=True)
-        self.resize_dataset(self.dimensions)
         self.apply_filters(filters)
 
     def load_images(self, paths):
@@ -101,6 +100,8 @@ class Dataset():
             for image in self.data:
                 image.median()
                 image.adaptive_thresholding()
+
+        self.resize_dataset(self.dimensions)
 
 
 class Sample():
