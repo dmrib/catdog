@@ -1,6 +1,6 @@
 """Dataset manipulation.
 
-This module deals with operation within the dataset concerning the preparation
+This module deals with operations within the dataset concerning the preparation
 for experiments.
 """
 
