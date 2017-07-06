@@ -1,8 +1,4 @@
-"""Dataset manipulation.
-
-This module deals with operations within the dataset concerning the preparation
-for experiments.
-"""
+"""Dataset manipulation."""
 
 import glob
 import os
