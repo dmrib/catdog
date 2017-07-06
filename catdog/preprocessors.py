@@ -1,6 +1,8 @@
 """Image preprocessing."""
 
 
+import os
+import random
 import cv2
 import numpy as np
 import dataset
@@ -102,6 +104,33 @@ class Dataset():
 
         self.resize_dataset(self.dimensions)
 
+    def generate_sintetic_dataset(self):
+        """Artificially expand the dataset mirroing and adding noise to samples.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        for image in self.data[0:int((len(self.data) * 0.3))]:
+            sintetic = image.mirrored('h')
+            name = os.path.basename(image.path)
+            cv2.imwrite('../data/sintetic/' + name, sintetic)
+
+        for image in self.data[0:-int((len(self.data) * 0.3))]:
+            sintetic = image.mirrored('v')
+            name = os.path.basename(image.path)
+            cv2.imwrite('../data/sintetic/' + name, sintetic)
+
+        paths = dataset.get_images_paths('../data/sintetic/*jpg')
+        random.shuffle(paths)
+
+        for image in self.data[0:int((len(self.data) * 0.3))]:
+            sintetic = image.with_noise()
+            name = os.path.basename(image.path)
+            cv2.imwrite('../data/sintetic/' + name, sintetic)
+
 
 class Sample():
     """Abstraction for a dataset image sample."""
@@ -115,6 +144,7 @@ class Sample():
             None.
 
         """
+        self.path = path
         self.image = cv2.imread(path)
         self.shape = self.image.shape[:2]
 
@@ -179,20 +209,40 @@ class Sample():
         """
         self.image = cv2.medianBlur(self.image, 5)
 
-    def mirror(self, axis):
-        """Mirror image horizontaly or verticaly (h or v).
+    def mirrored(self, axis='h'):
+        """Return horizontaly or verticaly (h or v) mirrored image.
 
         Args:
             axis (string): v for verticaly h for horizontaly.
         Returns:
-            None.
+            mirrored (np.ndarray): flipped image.
 
         """
         if axis == 'v':
-            self.image = cv2.flip(self.image, 0)
+            return cv2.flip(self.image, 0)
         else:
-            self.image = cv2.flip(self.image, 1)
+            return cv2.flip(self.image, 1)
 
+    def with_noise(self):
+        """Return image with gaussian noise.
+
+        Args:
+            None.
+        Returns:
+            noise (np.ndarray): image with noise.
+
+        """
+        with_noise = self.image
+        noise = int(0.3 * (with_noise.shape[0] * with_noise.shape[1]))
+        salt = noise * 0.5
+        for i in range(noise):
+            y = random.randint(0, with_noise.shape[1] - 1)
+            x = random.randint(0, with_noise.shape[0] - 1)
+            if i <= salt:
+                with_noise[x][y] = 255
+            else:
+                with_noise[x][y] = 0
+        return with_noise
 
 
 if __name__ == '__main__':
