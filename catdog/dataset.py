@@ -5,7 +5,7 @@ import os
 import random
 
 
-def get_images_paths(pattern='../data/*.jpg'):
+def get_images_paths(pattern='../data/originals/*.jpg'):
     """Return image paths that matches glob pattern.
 
     Args:
