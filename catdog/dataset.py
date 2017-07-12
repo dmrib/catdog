@@ -1,16 +1,16 @@
-"""Dataset preparation for ML algorithms.""" 
+"""Dataset preparation for ML algorithms."""
 
 import os
 import random
 import cv2
 import numpy as np
-import dataset
+import preprocessors
 
 
 class Dataset():
     """Abstraction for a image dataset."""
 
-    def __init__(self, paths, filters):
+    def __init__(self, paths, filters, use_mean):
         """Initializer.
 
         Args:
@@ -20,17 +20,17 @@ class Dataset():
 
         """
         self.data = self.load_images(paths)
-        self.dimensions = self.compute_default_size(use_mean=True)
+        self.dimensions = self.compute_default_size(use_mean)
         self.apply_filters(filters)
 
     def load_images(self, paths):
-        """Read every image in paths list.
+        """Load every image in paths list to memory.
 
         Args:
             paths (list): list containing images paths.
 
         Returns:
-            images (list): list of loaded sample images.
+            images (list): list of sample images.
 
         """
         images = []
@@ -63,7 +63,7 @@ class Dataset():
             return (min(widths), min(heights))
 
     def resize_dataset(self, dimensions):
-        """Resize entire dataset to default width and height.
+        """Resize entire dataset to given width and height.
 
         Args:
             dimensions (tuple): dimensions of the resized dataset.
@@ -83,20 +83,20 @@ class Dataset():
             None.
 
         """
-        if 'grayscale' in filters:
+        if filters == 'grayscale':
             for image in self.data:
                 image.grayscale()
-        elif 'thresholding' in filters:
+        elif filters == 'thresholding':
             for image in self.data:
                 image.adaptive_thresholding()
-        elif 'median' in filters:
+        elif filters == 'median':
             for image in self.data:
                 image.median()
-        elif 'grayscale and median' in filters:
+        elif filters == 'grayscale and median':
             for image in self.data:
                 image.grayscale()
                 image.median()
-        elif 'median and thresholding' in filters:
+        elif filters == 'median and thresholding':
             for image in self.data:
                 image.median()
                 image.adaptive_thresholding()
@@ -112,27 +112,40 @@ class Dataset():
             None.
 
         """
-        for image in self.data[0:int((len(self.data) * 0.3))]:
-            sintetic = image.mirrored('h')
-            name = os.path.basename(image.path)
-            cv2.imwrite('../data/sintetic/' + name, sintetic)
+        sintetic_dataset = []
+        for image in random.sample(self.data, int((len(self.data) * 0.3))):
+            altered_image = image.mirrored('h')
+            sintetic = SinteticSample(altered_image, 'sin-' + image.name,
+                                      image.label)
+            sintetic_dataset.append(sintetic)
 
-        for image in self.data[0:-int((len(self.data) * 0.3))]:
-            sintetic = image.mirrored('v')
-            name = os.path.basename(image.path)
-            cv2.imwrite('../data/sintetic/' + name, sintetic)
+        for image in random.sample(self.data, int((len(self.data) * 0.3))):
+            altered_image = image.mirrored('v')
+            sintetic = SinteticSample(altered_image, 'sin-' + image.name,
+                                      image.label)
+            sintetic_dataset.append(sintetic)
 
-        paths = dataset.get_images_paths('../data/sintetic/*jpg')
-        random.shuffle(paths)
+        for image in random.sample(self.data,
+                                   int((len(sintetic_dataset) * 0.3))):
+            image.with_noise()
 
-        for image in self.data[0:int((len(self.data) * 0.3))]:
-            sintetic = image.with_noise()
-            name = os.path.basename(image.path)
-            cv2.imwrite('../data/sintetic/' + name, sintetic)
+        self.data.extend(sintetic_dataset)
+
+    def show_dataset(self):
+        """Display the entire dataset to user.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        for image in self.data:
+            image.show()
 
 
 class Sample():
-    """Abstraction for a dataset image sample."""
+    """Abstraction for a image sample."""
 
     def __init__(self, path):
         """Initializer.
@@ -144,6 +157,8 @@ class Sample():
 
         """
         self.path = path
+        self.name = os.path.basename(path)
+        self.label = os.path.basename(path)[:3]
         self.image = cv2.imread(path)
         self.shape = self.image.shape[:2]
 
@@ -156,7 +171,7 @@ class Sample():
             None.
 
         """
-        cv2.imshow('Image', self.image)
+        cv2.imshow('Current Image', self.image)
         cv2.waitKey()
         cv2.destroyAllWindows()
 
@@ -212,7 +227,7 @@ class Sample():
         """Return horizontaly or verticaly (h or v) mirrored image.
 
         Args:
-            axis (string): v for verticaly h for horizontaly.
+            axis (str): v for verticaly h for horizontaly.
         Returns:
             mirrored (np.ndarray): flipped image.
 
@@ -228,22 +243,35 @@ class Sample():
         Args:
             None.
         Returns:
-            noise (np.ndarray): image with noise.
+            None.
 
         """
-        with_noise = self.image
-        noise = int(0.3 * (with_noise.shape[0] * with_noise.shape[1]))
+        noise = int(0.3 * (self.image.shape[0] * self.image.shape[1]))
         salt = noise * 0.5
         for i in range(noise):
-            y = random.randint(0, with_noise.shape[1] - 1)
-            x = random.randint(0, with_noise.shape[0] - 1)
+            y = random.randint(0, self.image.shape[1] - 1)
+            x = random.randint(0, self.image.shape[0] - 1)
             if i <= salt:
-                with_noise[x][y] = 255
+                self.image[x][y] = 255
             else:
-                with_noise[x][y] = 0
-        return with_noise
+                self.image[x][y] = 0
 
 
-if __name__ == '__main__':
-    s = Dataset(dataset.get_images_paths()[:10], ['median and thresholding'])
-    s.generate_sintetic_dataset()
+class SinteticSample(Sample):
+    """Abstraction for a artificially generated image."""
+
+    def __init__(self, image, name, label):
+        """Initializer.
+
+        Args:
+            image (np.ndarray): artificially generated image.
+            name (str): name for the image.
+            label (str): original image label.
+        Returns:
+            None.
+
+        """
+        self.image = image
+        self.name = name
+        self.label = label
+        self.shape = self.image.shape[:2]
