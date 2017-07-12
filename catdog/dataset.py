@@ -275,3 +275,10 @@ class SinteticSample(Sample):
         self.name = name
         self.label = label
         self.shape = self.image.shape[:2]
+
+
+if __name__ == '__main__':
+    s = Dataset(preprocessors.get_images_paths()[:150],
+                'median', True)
+    s.generate_sintetic_dataset()
+    s.show_dataset()
