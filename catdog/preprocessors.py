@@ -1,4 +1,4 @@
-"""Dataset manipulation."""
+"""Dataset files operations and helpers."""
 
 import glob
 import os

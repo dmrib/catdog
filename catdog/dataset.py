@@ -1,5 +1,4 @@
-"""Image preprocessing."""
-
+"""Dataset preparation for ML algorithms.""" 
 
 import os
 import random
