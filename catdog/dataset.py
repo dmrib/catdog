@@ -74,7 +74,7 @@ class Dataset():
         for image in self.data:
             image.resize(dimensions[0], dimensions[1])
 
-    def apply_filters(self, filters):
+    def apply_filters(self, filters=''):
         """Apply filters in the dataset images.
 
         Args:

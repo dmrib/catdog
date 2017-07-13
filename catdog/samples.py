@@ -130,7 +130,8 @@ class Sample():
         row = []
         for line in range(self.image.shape[0]):
             for column in range(self.image.shape[1]):
-                row.append(self.image[line][column])
+                for component in self.image[line][column]:
+                    row.append(component)
         return np.array(row)
 
 
