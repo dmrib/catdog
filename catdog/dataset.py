@@ -131,6 +131,21 @@ class Dataset():
 
         self.data.extend(sintetic_dataset)
 
+    def compute_data_matrix(self):
+        """Compute data matrix.
+
+        Args:
+            None.
+        Returns:
+            data_matrix (ndarray): data matrix.
+
+        """
+        data_matrix = []
+        for sample in self.data:
+            linear = sample.as_linear_array()
+            data_matrix.append(linear)
+        return np.array(data_matrix)
+
     def show_dataset(self):
         """Display the entire dataset to user.
 
@@ -142,26 +157,6 @@ class Dataset():
         """
         for image in self.data:
             image.show()
-
-    def linear_array_form(self):
-        """Convert dataset images matrix to linear form.
-
-        Args:
-            None.
-        Returns:
-            None.
-
-        """
-        for number, sample in enumerate(self.data):
-            row = np.empty((sample.image.shape[0] * sample.image.shape[1], 3),
-                           dtype=int)
-            for line in range(sample.image.shape[0]):
-                for column in range(sample.image.shape[1]):
-                    row[number] = sample.image[line][column]
-            sample.image = np.array(row)
-
-        for sample in self.data:
-            print(sample.image.shape)
 
 
 class Sample():
@@ -275,6 +270,21 @@ class Sample():
             else:
                 self.image[x][y] = 0
 
+    def as_linear_array(self):
+        """Return image matrix as linear array.
+
+        Args:
+            None.
+        Returns:
+            (np.ndarray): image matrix in linear array form.
+
+        """
+        row = []
+        for line in range(self.image.shape[0]):
+            for column in range(self.image.shape[1]):
+                row.append(self.image[line][column])
+        return np.array(row)
+
 
 class SinteticSample(Sample):
     """Abstraction for a artificially generated image."""
@@ -296,7 +306,7 @@ class SinteticSample(Sample):
 
 
 if __name__ == '__main__':
-    s = Dataset(preprocessors.get_images_paths()[:15],
-                'median', True)
+    s = Dataset(preprocessors.get_images_paths()[:105],
+                'thresholding', True)
     s.generate_sintetic_dataset()
-    s.linear_array_form()
+    matrix = s.compute_data_matrix()
