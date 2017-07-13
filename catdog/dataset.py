@@ -146,6 +146,20 @@ class Dataset():
             data_matrix.append(linear)
         return np.array(data_matrix)
 
+    def labels_array(self):
+        """Create array with sequencial dataset labels.
+
+        Args:
+            None.
+        Labels:
+            labels (list): image labels in sequencial order.
+
+        """
+        labels = []
+        for image in self.data:
+            labels.append(image.label)
+        return labels
+
     def show_dataset(self):
         """Display the entire dataset to user.
 
