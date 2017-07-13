@@ -52,8 +52,8 @@ class Dataset():
         """
         widths = []
         heights = []
-        for image in self.data:
-            width, height = image.shape
+        for sample in self.data:
+            width, height = sample.image.shape[:2]
             widths.append(width)
             heights.append(height)
 
@@ -143,6 +143,26 @@ class Dataset():
         for image in self.data:
             image.show()
 
+    def linear_array_form(self):
+        """Convert dataset images matrix to linear form.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        for number, sample in enumerate(self.data):
+            row = np.empty((sample.image.shape[0] * sample.image.shape[1], 3),
+                           dtype=int)
+            for line in range(sample.image.shape[0]):
+                for column in range(sample.image.shape[1]):
+                    row[number] = sample.image[line][column]
+            sample.image = np.array(row)
+
+        for sample in self.data:
+            print(sample.image.shape)
+
 
 class Sample():
     """Abstraction for a image sample."""
@@ -160,7 +180,6 @@ class Sample():
         self.name = os.path.basename(path)
         self.label = os.path.basename(path)[:3]
         self.image = cv2.imread(path)
-        self.shape = self.image.shape[:2]
 
     def show(self):
         """Display image.
@@ -184,7 +203,7 @@ class Sample():
             None.
 
         """
-        self.image = cv2.resize(self.image, (width, height),
+        self.image = cv2.resize(self.image, (height, width),
                                 interpolation=cv2.INTER_AREA)
 
     def grayscale(self):
@@ -274,11 +293,10 @@ class SinteticSample(Sample):
         self.image = image
         self.name = name
         self.label = label
-        self.shape = self.image.shape[:2]
 
 
 if __name__ == '__main__':
-    s = Dataset(preprocessors.get_images_paths()[:150],
+    s = Dataset(preprocessors.get_images_paths()[:15],
                 'median', True)
     s.generate_sintetic_dataset()
-    s.show_dataset()
+    s.linear_array_form()
