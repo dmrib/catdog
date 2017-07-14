@@ -151,7 +151,7 @@ class Dataset():
 
         Args:
             None.
-        Labels:
+        Returns:
             labels (list): image labels in sequencial order.
 
         """
@@ -159,6 +159,21 @@ class Dataset():
         for image in self.data:
             labels.append(image.label)
         return labels
+
+    def labels_to_real(self):
+        """Convert the string labels to a integer value.
+
+        Args:
+            None.
+        Returns:
+            None.
+
+        """
+        for image in self.data:
+            if image.label == 'cat':
+                image.label = 1
+            else:
+                image.label = 2
 
     def show_dataset(self):
         """Display the entire dataset to user.
@@ -171,10 +186,3 @@ class Dataset():
         """
         for image in self.data:
             image.show()
-
-
-if __name__ == '__main__':
-    s = Dataset(preprocessors.get_images_paths()[:105],
-                'thresholding', True)
-    s.generate_sintetic_dataset()
-    matrix = s.compute_data_matrix()
