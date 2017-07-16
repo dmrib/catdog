@@ -2,25 +2,78 @@
 
 
 import random
+import glob
 import numpy as np
 import samples
+
+
+def get_images_paths(pattern='../data/*.jpg', size='full', test_ratio=0.2,
+                     fast_set_size=300):
+    """Return path of images that matches glob pattern.
+
+    Args:
+        pattern (str): glob pattern.
+        size (str): 'fast' for reduced dataset size, 'full' for entire data.
+        test_ratio (float): test set size percentual.
+        fast_set_size (int): size of the reduced set.
+    Returns:
+        training_paths (list): contains all training set image paths.
+        test_paths (list): contains all test set image paths.
+
+    """
+    paths = glob.glob(pattern)
+    random.shuffle(paths)
+
+    if size == 'fast':
+        paths = paths[:fast_set_size]
+
+    test_set_size = int(len(paths)*test_ratio)
+    test_paths = paths[:test_set_size]
+    training_paths = paths[test_set_size:]
+
+    return training_paths, test_paths
 
 
 class Dataset():
     """Abstraction for a image dataset."""
 
-    def __init__(self, paths, filters, use_mean):
+    def __init__(self, paths, config, verbose):
         """Initializer.
 
         Args:
             paths (list): list containing images paths.
+            config (dict): dictionary containing setup parameters.
+            verbose (bool): display progress messages.
         Returns:
             None.
 
         """
         self.data = self.load_images(paths)
-        self.dimensions = self.compute_default_size(use_mean)
-        self.apply_filters(filters)
+        self.dimensions = self.compute_default_size()
+        self.load()
+
+    def load(self):
+        """Load dataset to memory.
+
+        Args:
+            path (str): path to images.
+        Returns:
+            None.
+
+        """
+        if self.verbose:
+            print('   Applying filters...')
+        self.apply_filters(self.config['filters'])
+
+        if self.config['resize'] == 'True':
+            if self.verbose:
+                print('   Resizing dataset...')
+            self.resize()
+
+        if self.config['expand'] == 'True':
+            if self.verbose:
+                print('   Expanding dataset...')
+            self.generate_sintetic_dataset()
 
     def load_images(self, paths):
         """Load every image in paths list to memory.
@@ -39,15 +92,14 @@ class Dataset():
 
         return images
 
-    def compute_default_size(self, use_mean=False):
-        """Compute the maximum and mean image width and height in the dataset.
+    def compute_default_size(self):
+        """Compute the mean image width and height in the dataset.
 
         Args:
-            use_mean (boolean): if True returns the image mean width and height
-                                instead of minimum values.
+            None.
         Returns:
-            width (int): maximum image width.
-            height (int): maximum image height.
+            width (int): mean image width.
+            height (int): mean image height.
 
         """
         widths = []
@@ -57,28 +109,25 @@ class Dataset():
             widths.append(width)
             heights.append(height)
 
-        if use_mean:
-            return (int(np.mean(widths)), int(np.mean(heights)))
-        else:
-            return (min(widths), min(heights))
+        return (int(np.mean(widths)), int(np.mean(heights)))
 
-    def resize_dataset(self, dimensions):
+    def resize(self):
         """Resize entire dataset to given width and height.
 
         Args:
-            dimensions (tuple): dimensions (width, height) of adjusted dataset.
+            None.
         Returns:
             None.
 
         """
         for image in self.data:
-            image.resize(dimensions[0], dimensions[1])
+            image.resize(self.dimensions[0], self.dimensions[1])
 
-    def apply_filters(self, filters=''):
+    def apply_filters(self, filters):
         """Apply filters in the dataset images.
 
         Args:
-            filters (list): name of the filters to be applied.
+            None.
         Returns:
             None.
 
@@ -100,8 +149,6 @@ class Dataset():
             for image in self.data:
                 image.median()
                 image.adaptive_thresholding()
-
-        self.resize_dataset(self.dimensions)
 
     def generate_sintetic_dataset(self):
         """Artificially expand the dataset mirroing and adding noise to samples.
