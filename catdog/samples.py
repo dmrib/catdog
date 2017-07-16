@@ -14,15 +14,14 @@ class Sample():
         """Initializer.
 
         Args:
-            path(str): sample image path.
+            path(str): image path.
         Returns:
             None.
 
         """
-        self.path = path
+        self.image = cv2.imread(path)
         self.name = os.path.basename(path)
         self.label = os.path.basename(path)[:3]
-        self.image = cv2.imread(path)
 
     def show(self):
         """Display image.
@@ -44,6 +43,9 @@ class Sample():
             None.
         Returns:
             None.
+
+        Probably because of the original OpenCV C syntax, the order of the
+        parameters height and width are reversed in the cv2.resize call.
 
         """
         self.image = cv2.resize(self.image, (height, width),
@@ -94,22 +96,23 @@ class Sample():
             mirrored (np.ndarray): flipped image.
 
         """
-        if axis == 'v':
-            return cv2.flip(self.image, 0)
-        else:
+        if axis == 'h':
             return cv2.flip(self.image, 1)
+        else:
+            return cv2.flip(self.image, 0)
 
-    def with_noise(self):
+    def with_noise(self, noise_p=0.3, salt_p=0.5):
         """Return image with gaussian noise.
 
         Args:
-            None.
+            noise_p (float): percentual of pixels to be altered.
+            salt_p (float): percentual of salt type noise.
         Returns:
             None.
 
         """
-        noise = int(0.3 * (self.image.shape[0] * self.image.shape[1]))
-        salt = noise * 0.5
+        noise = int(noise_p * (self.image.shape[0] * self.image.shape[1]))
+        salt = noise * salt_p
         for i in range(noise):
             y = random.randint(0, self.image.shape[1] - 1)
             x = random.randint(0, self.image.shape[0] - 1)
