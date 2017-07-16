@@ -12,6 +12,58 @@ import preprocessors as pps
 import dataset
 
 
+class Experiment():
+    """Abstraction for a classification experiment."""
+
+    def __init__(self, path, verbose=False):
+        """Initializer.
+
+        Args:
+            path (str): path to experiment configuration file.
+            verbose (bool): show progress messages.
+        Returns:
+            None.
+
+        """
+        self.verbose = verbose
+        self.setup(path)
+
+    def setup(self, path):
+        """Prepare experiment.
+
+        Args:
+            path (str): path to experiment configuration file.
+        Returns:
+            None.
+
+        """
+        if self.verbose:
+            print('\nReading configuration file...')
+        self.config = self.read_config_file(path)
+
+        if self.verbose:
+            print('\n-- Starting experiment')
+            print('   Loading dataset...')
+
+    def read_config_file(self, path):
+        """Read configuration file with experiment parameters.
+
+        Args:
+            path (str): path to configuration file.
+        Returns:
+            config (dict): dictionary containing experiment parameters.
+
+        """
+        config = {}
+        with open(path) as config_file:
+            for line in config_file:
+                if line[0] != '#' and line[0] != '\n':
+                    parameter, value = line.split(' ')
+                    config[parameter] = value.rstrip('\n')
+
+        return config
+
+
 def neural_nets(filters, layers, verbose=False):
     """Neural nets experiment."""
     # Dataset folder operations
@@ -241,3 +293,6 @@ def k_nearest(filters, n_neighbors, weights, verbose=False):
     print('\nMean score: ', mean_score)
     print('Standard deviation: ', std_deviation)
     print('F: ', f)
+
+if __name__ == '__main__':
+    ex = Experiment('../config/test-experiment.conf', verbose=True)
