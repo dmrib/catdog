@@ -101,7 +101,7 @@ class Sample():
         else:
             return cv2.flip(self.image, 0)
 
-    def with_noise(self, noise_p=0.3, salt_p=0.5):
+    def apply_noise(self, noise_p=0.3, salt_p=0.5):
         """Return image with gaussian noise.
 
         Args:

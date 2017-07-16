@@ -43,7 +43,8 @@ class Dataset():
         """Compute the maximum and mean image width and height in the dataset.
 
         Args:
-            paths (list): paths of images to be labeled.
+            use_mean (boolean): if True returns the image mean width and height
+                                instead of minimum values.
         Returns:
             width (int): maximum image width.
             height (int): maximum image height.
@@ -65,7 +66,7 @@ class Dataset():
         """Resize entire dataset to given width and height.
 
         Args:
-            dimensions (tuple): dimensions of the resized dataset.
+            dimensions (tuple): dimensions (width, height) of adjusted dataset.
         Returns:
             None.
 
@@ -124,9 +125,9 @@ class Dataset():
                                               image.name, image.label)
             sintetic_dataset.append(sintetic)
 
-        for image in random.sample(self.data,
+        for image in random.sample(self.sintetic_dataset,
                                    int((len(sintetic_dataset) * 0.3))):
-            image.with_noise()
+            image.apply_noise()
 
         self.data.extend(sintetic_dataset)
 
@@ -158,21 +159,6 @@ class Dataset():
         for image in self.data:
             labels.append(image.label)
         return labels
-
-    def labels_to_real(self):
-        """Convert the string labels to a integer value.
-
-        Args:
-            None.
-        Returns:
-            None.
-
-        """
-        for image in self.data:
-            if image.label == 'cat':
-                image.label = 1
-            else:
-                image.label = 2
 
     def show_dataset(self):
         """Display the entire dataset to user.
