@@ -8,7 +8,7 @@ import samples
 
 
 def get_images_paths(pattern='../data/*.jpg', size='full', test_percentage=0.2,
-                     fast_set_size=300):
+                     fast_set_size=300, verbose=False):
     """Return path of images that matches glob pattern.
 
     Args:
@@ -48,12 +48,14 @@ class Dataset():
             None.
 
         """
+        self.verbose = verbose
+        self.config = config
         self.data = self.load_images(paths)
         self.dimensions = self.compute_default_size()
-        self.load()
+        self.adapt()
 
-    def load(self):
-        """Load dataset to memory.
+    def adapt(self):
+        """Adapt dataset to predefined parameters.
 
         Args:
             path (str): path to images.
@@ -172,7 +174,7 @@ class Dataset():
                                               image.name, image.label)
             sintetic_dataset.append(sintetic)
 
-        for image in random.sample(self.sintetic_dataset,
+        for image in random.sample(sintetic_dataset,
                                    int((len(sintetic_dataset) * 0.3))):
             image.apply_noise()
 
@@ -187,6 +189,8 @@ class Dataset():
             data_matrix (ndarray): data matrix.
 
         """
+        if self.verbose:
+            print('\n-- Computing data matrix')
         data_matrix = []
         for sample in self.data:
             linear = sample.as_linear_array()
@@ -202,6 +206,8 @@ class Dataset():
             labels (list): image labels in sequencial order.
 
         """
+        if self.verbose:
+            print('   Extracting labels...')
         labels = []
         for image in self.data:
             labels.append(image.label)

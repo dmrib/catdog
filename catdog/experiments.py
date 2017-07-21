@@ -24,9 +24,10 @@ class Experiment():
             None.
 
         """
+        self.config = None
         self.dataset = None
-        self.data_matrix = None
         self.labels = []
+        self.data_matrix = None
         self.verbose = verbose
 
         self.setup(path)
@@ -42,23 +43,25 @@ class Experiment():
         """
         if self.verbose:
             print('\n-- Starting experiment')
+
         self.config = self.read_config_file(path)
 
-        paths = dataset.get_images_paths(self.config['training_path'])
-        self.dataset = dataset.Dataset(paths=paths, config=self.config,
+        training_paths, test_paths = dataset.get_images_paths(
+                                         self.config['training_path'],
+                                         self.config['dataset_mode'])
+
+        if self.verbose:
+            print('\n-- Loading dataset \n')
+        self.dataset = dataset.Dataset(paths=training_paths, config=self.config,
                                        verbose=self.verbose)
 
-        if self.verbose:
-            print('\n-- Extracting labels')
         self.labels = self.dataset.labels_array()
-
-        if self.verbose:
-            print('\n-- Computing data matrix')
+        
         self.data_matrix = self.dataset.compute_data_matrix()
 
         if self.verbose:
             print('\n-- Making principal component analysis')
-        pca = PCA(self.config['n_components'])
+        pca = PCA(int(self.config['n_components']))
         pca.fit_transform(self.data_matrix, y=self.labels)
 
     def read_config_file(self, path):
@@ -71,7 +74,7 @@ class Experiment():
 
         """
         if self.verbose:
-            print('\nReading configuration file...')
+            print('\n   Reading configuration file...')
         config = {}
         with open(path) as config_file:
             for line in config_file:
@@ -79,7 +82,6 @@ class Experiment():
                     parameter, value = line.split(' ')
                     config[parameter] = value.rstrip('\n')
 
-        print(config)
         return config
 
 
@@ -88,7 +90,7 @@ def neural_nets(filters, layers, verbose=False):
     # Dataset folder operations
     if verbose:
         print('Getting dataset images paths...')
-    paths = dataset.get_images_paths('../data/training/*.jpg')
+    paths = pps.get_images_paths('../data/training/*.jpg')
 
     # Loading dataset
     if verbose:
@@ -313,6 +315,5 @@ def k_nearest(filters, n_neighbors, weights, verbose=False):
     print('Standard deviation: ', std_deviation)
     print('F: ', f)
 
-
 if __name__ == '__main__':
-    ex = Experiment('../config/test-experiment.conf', verbose=True)
+    ex = Experiment('../config/example.conf', verbose=True)
