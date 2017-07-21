@@ -79,6 +79,7 @@ class Experiment():
                     parameter, value = line.split(' ')
                     config[parameter] = value.rstrip('\n')
 
+        print(config)
         return config
 
 
@@ -87,7 +88,7 @@ def neural_nets(filters, layers, verbose=False):
     # Dataset folder operations
     if verbose:
         print('Getting dataset images paths...')
-    paths = pps.get_images_paths('../data/training/*.jpg')
+    paths = dataset.get_images_paths('../data/training/*.jpg')
 
     # Loading dataset
     if verbose:
@@ -143,7 +144,7 @@ def suport_vector(filters, kernel, verbose=False, degree=None):
     # Dataset folder operations
     if verbose:
         print('Getting dataset images paths...')
-    paths = pps.get_images_paths('../data/training/*.jpg')
+    paths = dataset.get_images_paths('../data/training/*.jpg')
 
     # Loading dataset
     if verbose:
@@ -203,7 +204,7 @@ def random_forest_classifier(filters, n_estimators, criterion, verbose=False):
     # Dataset folder operations
     if verbose:
         print('Getting dataset images paths...')
-    paths = pps.get_images_paths('../data/training/*.jpg')
+    paths = dataset.get_images_paths('../data/training/*.jpg')
 
     # Loading dataset
     if verbose:
@@ -261,7 +262,7 @@ def k_nearest(filters, n_neighbors, weights, verbose=False):
     # Dataset folder operations
     if verbose:
         print('Getting dataset images paths...')
-    paths = pps.get_images_paths('../data/training/*.jpg')
+    paths = dataset.get_images_paths('../data/training/*.jpg')
 
     # Loading dataset
     if verbose:
@@ -312,5 +313,6 @@ def k_nearest(filters, n_neighbors, weights, verbose=False):
     print('Standard deviation: ', std_deviation)
     print('F: ', f)
 
+
 if __name__ == '__main__':
-    ex = Experiment('../config/example.conf', verbose=True)
+    ex = Experiment('../config/test-experiment.conf', verbose=True)

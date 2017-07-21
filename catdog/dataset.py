@@ -7,14 +7,14 @@ import numpy as np
 import samples
 
 
-def get_images_paths(pattern='../data/*.jpg', size='full', test_ratio=0.2,
+def get_images_paths(pattern='../data/*.jpg', size='full', test_percentage=0.2,
                      fast_set_size=300):
     """Return path of images that matches glob pattern.
 
     Args:
         pattern (str): glob pattern.
         size (str): 'fast' for reduced dataset size, 'full' for entire data.
-        test_ratio (float): test set size percentual.
+        test_percentage (float): test set size percentage.
         fast_set_size (int): size of the reduced set.
     Returns:
         training_paths (list): contains all training set image paths.
@@ -27,7 +27,7 @@ def get_images_paths(pattern='../data/*.jpg', size='full', test_ratio=0.2,
     if size == 'fast':
         paths = paths[:fast_set_size]
 
-    test_set_size = int(len(paths)*test_ratio)
+    test_set_size = int(len(paths)*test_percentage)
     test_paths = paths[:test_set_size]
     training_paths = paths[test_set_size:]
 
